@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* overriding KaTeX styles */
+.katex {
+  font: normal 1em KaTeX_Main, Times New Roman, serif;
+  line-height: 1;
+  text-indent: 0;
+  text-rendering: auto
+}
+
+body {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 18px;
+  padding: 2rem 2rem;
+  background-color: #fffef0;
+}
+
+#container {
+  padding: 1rem 1rem;
+}
+
+.day {
+  color: black;
+  background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.03) 0px 0px 10px 5px;
+}
+
+#footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+h2,
+h3,
+h4 {
+  font-weight: normal;
+  margin: 0;
+}
+
+#header {
+  text-align: center;
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+}
+
+label {
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+a {
+  color: rgba(56, 56, 56, 0.5);
+  text-decoration: none;
+  background-position: bottom;
+  background-size: 100% 0.35em;
+  background-repeat: repeat-x;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+a:hover {
+  color: #d480aa;
+  background-image: linear-gradient(transparent, transparent 4px, #d480aa 4px, #d480aa);
+  background-size: 100% 0.38em;
+}
+
+.vert-top {
+  margin: 0 5px;
+  vertical-align: top;
+}
+
+#typeface-set {
+  margin: 5px 0px;
+}
+
+.cm-editor {
+  font-size: 16px;
+}
+
+#display-view {
+  font-size: 18px;
+  font-family: "TexGyrePagella", serif, sans-serif;
+}
+
+#editor-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.column {
+  flex: 1;
+  min-width: 300px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+
+.column-1 {
+  background-color: #e6f7ff;
+}
+
+.column-2 {
+  background-color: #fff2e6;
+}
+
+
+@media (max-width: 1200px) {
+  body {
+    font-size: 16px;
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  #editor-container {
+    flex-direction: column;
+  }
+
+  .column {
+    width: 100%;
+  }
+}
