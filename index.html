@@ -21,10 +21,12 @@
     <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 
     <script src="./legacy-modes-stex/stex.js"></script>
+    <script src="./vscode-markdown-it-katex/index.js"></script>
     <script src="./snippets/fixed.js"></script>
     <script src="./snippets/unary.js"></script>
     <script src="./snippets/binary.js"></script>
-    <script src="./vscode-markdown-it-katex/index.js"></script>
+    <script src="./snippets/custom.js"></script>
+    <script src="./fs.js"></script>
 
     <link rel="stylesheet" href="./css/site.css">
     <link rel="stylesheet" href="./css/font.css">
@@ -34,6 +36,13 @@
 
 <body>
     <h2 id="header">Napkin</h2>
+
+    <div id="actions" style="text-align: center; margin-bottom: 1em;">
+        <span id="open-span" class="action-span">open</span>
+        <span id="current-file-span"></span>
+        <span id="save-span" class="action-span">save</span>
+        <input type="file" id="file-input" accept=".md" style="display: none;">
+    </div>
 
     <div id="container" class="day">
         <div id="editor-container">
@@ -52,6 +61,52 @@
     <script>
         const headerHtml = katex.renderToString(String.raw`\text{Welcome to } (\infty,1)\text{-Napkin}`);
         document.getElementById('header').innerHTML = headerHtml;
+
+        const fileInput = document.getElementById('file-input');
+        const openSpan = document.getElementById('open-span');
+        const saveSpan = document.getElementById('save-span');
+        const currentFileSpan = document.getElementById('current-file-span');
+
+        const currentFileState = { name: null };
+
+        openSpan.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const content = await readFile(file);
+                editorView.dispatch({
+                    changes: {
+                        from: 0,
+                        to: editorView.state.doc.length,
+                        insert: content
+                    }
+                });
+
+                saveSpan.disabled = false;
+                currentFileState.name = file.name;
+                currentFileSpan.textContent = `[editing: ${currentFileState.name}]`;
+            } catch (error) {
+                alert('Open file failed: ' + error.message);
+            } finally {
+                fileInput.value = '';
+            }
+        });
+
+        saveSpan.addEventListener('click', async () => {
+            try {
+                await saveFile(currentFileState.name, editorView.state.doc.toString());
+                currentFileSpan.textContent = `[saved: ${currentFileState.name}]`;
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    alert('Save failed: ' + error.message);
+                }
+            }
+        });
 
         const { basicSetup } = CM["codemirror"]
         const { EditorView, keymap } = CM["@codemirror/view"]
@@ -86,22 +141,8 @@
                 .map(x => snippetCompletion(`\\${x}{\${}}`, { label: `\\${x}{}`, type: 'keyword', detail: unary[x]('a') }));
             const snippetBinary = Object.keys(binary)
                 .map(x => snippetCompletion(`\\${x}{\${}}{\${}}`, { label: `\\${x}{}{}`, type: 'keyword', detail: binary[x]('a', 'b') }));
-            const snippetBlock = [
-                snippetCompletion("$$\n\\begin{align}\n${}\n\\end{align}\n$$", { label: "align", type: "keyword", detail: "\\begin{align}" }), 
-                
-                snippetCompletion("$$\n\\begin{aligned}\n${}\n\\end{aligned}\n$$", { label: "aligned", type: "keyword", detail: "\\begin{aligned}" }), 
-                
-                snippetCompletion("$$\n\\begin{cases}\n0, & p \\\\\n1, & q\n\\end{cases}\n$$", { label: "cases", type: "keyword", detail: "\\begin{cases}" }), 
-                
-                snippetCompletion("$$\n\\begin{matrix}\n  a & b \\\\\n  c & d\n\\end{matrix}$$", { label: "matrix", type: "keyword", detail: "\\begin{matrix}" }),
-
-                snippetCompletion("$$\n\\begin{pmatrix}\n  a & b \\\\\n  c & d\n\\end{pmatrix}$$", { label: "pmatrix", type: "keyword", detail: "\\begin{pmatrix}" }),
-
-                snippetCompletion("$$\n\\begin{bmatrix}\n  a & b \\\\\n  c & d\n\\end{bmatrix}$$", { label: "bmatrix", type: "keyword", detail: "\\begin{bmatrix}" }),
-
-                snippetCompletion("$$\n\\begin{vmatrix}\n  a & b \\\\\n  c & d\n\\end{vmatrix}$$", { label: "vmatrix", type: "keyword", detail: "\\begin{vmatrix}" }),
-            ];
-            return snippetFixed.concat(snippetUnary).concat(snippetBinary).concat(snippetBlock);
+            const snippetCustom = custom.map(x => snippetCompletion(x.apply, { label: x.label, type: 'keyword', detail: x.detail }));
+            return snippetFixed.concat(snippetUnary).concat(snippetBinary).concat(snippetCustom);
         }
 
         function supplyUniTeXCompletions(context) {

@@ -23,6 +23,26 @@ body {
   padding: 1rem 1rem;
 }
 
+.action-span {
+  cursor: pointer;
+}
+
+.action-span::before {
+  content: "[";
+}
+
+.action-span::after {
+  content: "]";
+}
+
+.action-span:hover {
+  color: #2196F3;
+}
+
+#current-file-span {
+  color: rgba(56, 56, 56, 0.5);
+}
+
 .day {
   color: black;
   background-color: #fff;
@@ -100,7 +120,7 @@ a:hover {
 }
 
 .column-1 {
-  background-color: #e6f7ff;
+  background-color: #e6f7ffa0;
 }
 
 .column-2 {
