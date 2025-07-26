@@ -45,7 +45,8 @@
     <div id="footer">
         Created by <a class="vert-top" href="https://github.com/kokic" target="_blank">kokic</a> |
         <a class="vert-top" href="https://github.com/kokic/napkin/blob/main/LICENSE" target="_blank">GPL v3.0</a> |
-        <a class="vert-top" href="https://github.com/kokic/napkin" target="_blank">Github</a>
+        <a class="vert-top" href="https://github.com/kokic/napkin" target="_blank">Github</a> |
+        <a class="vert-top" href="https://katex.org/docs/supported.html" target="_blank">Macros</a>
     </div>
 
     <script>
@@ -85,11 +86,26 @@
                 .map(x => snippetCompletion(`\\${x}{\${}}`, { label: `\\${x}{}`, type: 'keyword', detail: unary[x]('a') }));
             const snippetBinary = Object.keys(binary)
                 .map(x => snippetCompletion(`\\${x}{\${}}{\${}}`, { label: `\\${x}{}{}`, type: 'keyword', detail: binary[x]('a', 'b') }));
-            return snippetFixed.concat(snippetUnary).concat(snippetBinary);
+            const snippetBlock = [
+                snippetCompletion("$$\n\\begin{align}\n${}\n\\end{align}\n$$", { label: "align", type: "keyword", detail: "\\begin{align}" }), 
+                
+                snippetCompletion("$$\n\\begin{aligned}\n${}\n\\end{aligned}\n$$", { label: "aligned", type: "keyword", detail: "\\begin{aligned}" }), 
+                
+                snippetCompletion("$$\n\\begin{cases}\n0, & p \\\\\n1, & q\n\\end{cases}\n$$", { label: "cases", type: "keyword", detail: "\\begin{cases}" }), 
+                
+                snippetCompletion("$$\n\\begin{matrix}\n  a & b \\\\\n  c & d\n\\end{matrix}$$", { label: "matrix", type: "keyword", detail: "\\begin{matrix}" }),
+
+                snippetCompletion("$$\n\\begin{pmatrix}\n  a & b \\\\\n  c & d\n\\end{pmatrix}$$", { label: "pmatrix", type: "keyword", detail: "\\begin{pmatrix}" }),
+
+                snippetCompletion("$$\n\\begin{bmatrix}\n  a & b \\\\\n  c & d\n\\end{bmatrix}$$", { label: "bmatrix", type: "keyword", detail: "\\begin{bmatrix}" }),
+
+                snippetCompletion("$$\n\\begin{vmatrix}\n  a & b \\\\\n  c & d\n\\end{vmatrix}$$", { label: "vmatrix", type: "keyword", detail: "\\begin{vmatrix}" }),
+            ];
+            return snippetFixed.concat(snippetUnary).concat(snippetBinary).concat(snippetBlock);
         }
 
         function supplyUniTeXCompletions(context) {
-            let token = context.matchBefore(/\\[A-Za-z]*/)
+            let token = context.matchBefore(/[\\]*[A-Za-z]*/)
             if (!token || (token.from == token.to && !context.explicit))
                 return null
             return {
